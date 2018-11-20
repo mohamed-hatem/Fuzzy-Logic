@@ -1,5 +1,5 @@
 2
-Temp 65
+Temp 88
 4
 Freezing trapezoidal
 0 0 30 50
@@ -9,7 +9,7 @@ Warm triangle
 50 70 90
 Hot trapezoidal
 70 90 100 100  
-Cover 70
+Cover 79
 3
 Sunny trapezoidal
 0 0 20 40

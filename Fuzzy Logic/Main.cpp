@@ -213,7 +213,7 @@ public:
 			   
 				   if (list_of_fuzzy_sets[loop1].list_of_members[loop2].shape_type == TRIANGLE)
 				   {   //Crisp value isnt in range
-					   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2])
+					   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value >= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2])
 						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
 					   //Crisp value between triangle centroids
 					   else if (current_crisp_value == list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0])
@@ -224,6 +224,7 @@ public:
 						   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
 						   {
 							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
+
 
 						   }
 						   else
@@ -237,7 +238,7 @@ public:
 				   //Trapezoidal
 				   else
 				   {   //Crisp value isnt in range
-					   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
+					   if (current_crisp_value <= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
 						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
 					   //Crisp value between trapeziodal centroids
 					   else if (current_crisp_value >= list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] && current_crisp_value <= list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1])
@@ -251,6 +252,7 @@ public:
 						   {
 							  list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]);
 							  list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
+							  
 						   }
 						   else if(list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
 						   {
@@ -258,6 +260,7 @@ public:
 							   {
 								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
 								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
+								   
 							   }
 							   else
 							   {
@@ -269,6 +272,7 @@ public:
 						   {
 							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - current_crisp_value) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
 							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
+							
 						   }
 
 					   }
@@ -279,6 +283,7 @@ public:
 			
 
 		}
+	//Function to print values of membership after fuzzification
 	void printAfterFuzzification()
 	{
 		cout << "After Fuzzification : " << endl;
@@ -291,6 +296,13 @@ public:
 
 			}
 		}
+	}
+	/*After fuzzification we will use the membership values and use them in the fuzzy system rules
+	*The output of this function will be used in the defuzzification function
+	*/
+	void inferenceEngine()
+	{
+
 	}
 	//Destructor
 	~Toolbox()

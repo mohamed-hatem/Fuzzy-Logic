@@ -1,5 +1,5 @@
 2
-Temp 88
+Temp 65
 4
 Freezing trapezoidal
 0 0 30 50
@@ -9,7 +9,7 @@ Warm triangle
 50 70 90
 Hot trapezoidal
 70 90 100 100  
-Cover 79
+Cover 25
 3
 Sunny trapezoidal
 0 0 20 40
@@ -25,5 +25,5 @@ Fast trapezoidal
 25 75 100 100
 2
 2 Temp = Warm AND Cover = Sunny Speed = Fast
-2 Temp = Cool OR Cover = Cloudy Speed = Slow
+2 Temp = Cool AND Cover = Cloudy Speed = Slow
 

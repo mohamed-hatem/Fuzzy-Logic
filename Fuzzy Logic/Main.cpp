@@ -31,7 +31,7 @@ struct FuzzySetShape
 	//Type of the shape
 	string shape_type;
 	//Storing member value after fuzzification
-	double fuzzification_value;
+	double fuzzification_value= 0.0;
 	/*Indication for where the centroid of the shape is located
 	*For triangle it's the middle coordinate , for trapezoidal its where 2 coordinates are equal
 	*If trapezoidal save the range of centroid
@@ -302,7 +302,156 @@ public:
 	*/
 	void inferenceEngine()
 	{
+		double current_membership_value, first_variable_value, second_variable_value;
+		string first_variable_name, second_variable_name, first_variable_lingustic_name, second_variable_lingustic_name;
+		for (int loop1 = 0; loop1 < number_of_rule_set; loop1++)
+		{
+			current_membership_value = 0.0;
 
+			first_variable_name = list_of_rules[loop1].list_of_variables_in_rule[0].variable_name;
+			first_variable_lingustic_name = list_of_rules[loop1].list_of_variables_in_rule[0].linguistic_name;
+			second_variable_name = list_of_rules[loop1].list_of_variables_in_rule[1].variable_name;
+			second_variable_lingustic_name = list_of_rules[loop1].list_of_variables_in_rule[1].linguistic_name;
+			if (list_of_rules[loop1].predicate_list[0] == "OR")
+			{
+				for (int loop2 = 0; loop2 < number_of_fuzzy_set; loop2++)
+				{
+					if (list_of_fuzzy_sets[loop2].variable_name == first_variable_name)
+					{
+						for (int loop3 = 0; loop3 < list_of_fuzzy_sets[loop2].number_of_lingustical_terms; loop3++)
+						{
+							if (first_variable_lingustic_name == list_of_fuzzy_sets[loop2].list_of_members[loop3].member_name)
+							{
+								first_variable_value = list_of_fuzzy_sets[loop2].list_of_members[loop3].fuzzification_value;
+								break;
+							}
+						}
+					}
+					if (list_of_fuzzy_sets[loop2].variable_name == second_variable_name)
+					{
+						for (int loop3 = 0; loop3 < list_of_fuzzy_sets[loop2].number_of_lingustical_terms; loop3++)
+						{
+							if (second_variable_lingustic_name == list_of_fuzzy_sets[loop2].list_of_members[loop3].member_name)
+							{
+								second_variable_value = list_of_fuzzy_sets[loop2].list_of_members[loop3].fuzzification_value;
+								break;
+							}
+						}
+					}
+				}
+				if (first_variable_value > second_variable_value)
+					current_membership_value = first_variable_value;
+				else
+					current_membership_value = second_variable_value;
+
+			}
+			//AND
+			else
+			{
+				
+				for (int loop2 = 0; loop2 < number_of_fuzzy_set; loop2++)
+				{
+					if (list_of_fuzzy_sets[loop2].variable_name == first_variable_name)
+					{
+						for (int loop3 = 0; loop3 < list_of_fuzzy_sets[loop2].number_of_lingustical_terms; loop3++)
+						{
+							
+							if (first_variable_lingustic_name == list_of_fuzzy_sets[loop2].list_of_members[loop3].member_name)
+							{
+								first_variable_value = list_of_fuzzy_sets[loop2].list_of_members[loop3].fuzzification_value;
+								break;
+							}
+						}
+					}
+					if (list_of_fuzzy_sets[loop2].variable_name == second_variable_name)
+					{
+						for (int loop3 = 0; loop3 < list_of_fuzzy_sets[loop2].number_of_lingustical_terms; loop3++)
+						{
+							if (second_variable_lingustic_name == list_of_fuzzy_sets[loop2].list_of_members[loop3].member_name)
+							{
+								second_variable_value = list_of_fuzzy_sets[loop2].list_of_members[loop3].fuzzification_value;
+								break;
+							}
+						}
+					}
+				}
+				
+				if (first_variable_value > second_variable_value)
+					current_membership_value = second_variable_value;
+				else
+					current_membership_value = first_variable_value;
+
+			}
+			for (int loop2 = 1; loop2 < list_of_rules[loop1].number_of_variables_in_rule - 2; loop2++)
+			{
+				if (list_of_rules[loop1].predicate_list[loop2] == "OR")
+				{
+					for (int loop2 = 0; loop2 < number_of_fuzzy_set; loop2++)
+					{
+						if (list_of_fuzzy_sets[loop2].variable_name == list_of_rules[loop1].list_of_variables_in_rule[loop2 + 1].variable_name)
+						{
+							for (int loop3 = 0; loop3 < list_of_fuzzy_sets[loop2].number_of_lingustical_terms; loop3++)
+							{
+								if (list_of_rules[loop1].list_of_variables_in_rule[loop2 + 1].linguistic_name == list_of_fuzzy_sets[loop2].list_of_members[loop3].member_name)
+								{
+									first_variable_value = list_of_fuzzy_sets[loop2].list_of_members[loop3].fuzzification_value;
+									break;
+								}
+							}
+						}
+						if (first_variable_value > current_membership_value)
+							current_membership_value = first_variable_value;
+					}
+
+				}
+				//AND
+				else
+				{
+					for (int loop2 = 0; loop2 < number_of_fuzzy_set; loop2++)
+					{
+						if (list_of_fuzzy_sets[loop2].variable_name == list_of_rules[loop1].list_of_variables_in_rule[loop2 + 1].variable_name)
+						{
+							for (int loop3 = 0; loop3 < list_of_fuzzy_sets[loop2].number_of_lingustical_terms; loop3++)
+							{
+								if (list_of_rules[loop1].list_of_variables_in_rule[loop2 + 1].linguistic_name == list_of_fuzzy_sets[loop2].list_of_members[loop3].member_name)
+								{
+									first_variable_value = list_of_fuzzy_sets[loop2].list_of_members[loop3].fuzzification_value;
+									break;
+								}
+							}
+						}
+						if (first_variable_value < current_membership_value)
+							current_membership_value = first_variable_value;
+					}
+
+				}
+			}
+			
+				for (int loop2 = 0; loop2 < list_of_fuzzy_sets[number_of_fuzzy_set - 1].number_of_lingustical_terms; loop2++)
+				{				
+					if (list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop2].member_name == list_of_rules[loop1].list_of_variables_in_rule[list_of_rules[loop1].number_of_variables_in_rule-1].linguistic_name)
+					{
+						list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop2].fuzzification_value = current_membership_value;
+						break;
+					}
+
+				}
+			
+		
+	}
+	}
+	//Function to print results after function inferenceEngine
+	void printAfterInference()
+	{
+		cout << "After inference : " << endl;
+		for (int loop1 = 0; loop1 < list_of_fuzzy_sets[number_of_fuzzy_set-1].number_of_lingustical_terms; loop1++)
+		{
+			cout << "variable : " << list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].member_name << "  ";
+			cout << "has value = " << list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].fuzzification_value << endl;
+
+		}
+		
+		
 	}
 	//Destructor
 	~Toolbox()
@@ -340,6 +489,9 @@ int main()
 	my_tool_box.getInputFromFile();
 	my_tool_box.fuzzificaion();
 	my_tool_box.printAfterFuzzification();
+	my_tool_box.inferenceEngine();
+	cout << endl;
+	my_tool_box.printAfterInference();
 	system("pause");
 	
 }

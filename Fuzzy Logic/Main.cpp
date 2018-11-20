@@ -18,7 +18,7 @@ using namespace std;
 #define TRAPZOIDAL "trapezoidal"
 #define TRIANGLE   "triangle"
 //Name of the input file currently being used
-#define INPUT_FILE "test cases/Sample_input.txt"
+#define INPUT_FILE "test cases/Speed_test_case.txt"
 
 //Struct to hold points whether the fuzzy set is a triangle or trapezodial shape
 struct FuzzySetShape
@@ -32,11 +32,7 @@ struct FuzzySetShape
 	string shape_type;
 	//Storing member value after fuzzification
 	double fuzzification_value= 0.0;
-	/*Indication for where the centroid of the shape is located
-	*For triangle it's the middle coordinate , for trapezoidal its where 2 coordinates are equal
-	*If trapezoidal save the range of centroid
-	*/
-	double * centroid_range;
+	
 };
 //Holds the list of members and values for a rule
 struct MemberOfRuleSet
@@ -115,36 +111,13 @@ public:
 				{
 					input_file >> list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[loop3];
 				}
-				if (list_of_fuzzy_sets[loop1].list_of_members[loop2].shape_type == TRIANGLE)
-				{
-					list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range = new double[1];
-					list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1];
-				}
-				else
-				{
-					list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range = new double[2];
-					if (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
-					{
-						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0];
-						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2];
-					}
-					else if (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
-					{
-						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1];
-						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3];
-					}
-					else
-					{
-						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1];
-						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2];
-					}
-					
+				
 					
 				}
 
 			}
 
-		}
+		
 		//Read the rule set number
 		input_file >> number_of_rule_set;
 		//Initialize the rule set list
@@ -216,7 +189,7 @@ public:
 					   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value >= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2])
 						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
 					   //Crisp value between triangle centroids
-					   else if (current_crisp_value == list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0])
+					   else if (current_crisp_value == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
 						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0;
 					   //Calculate degree of membership
 					   else
@@ -237,48 +210,57 @@ public:
 				   }
 				   //Trapezoidal
 				   else
-				   {   //Crisp value isnt in range
-					   if (current_crisp_value <= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
-						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
-					   //Crisp value between trapeziodal centroids
-					   else if (current_crisp_value >= list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] && current_crisp_value <= list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1])
-					   {
-						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0;
-					   }
-					   //Calculate degree of membership
-					   else
-					   {
-						   if (list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0])
+				   {       //Start centroids
+						   if (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
 						   {
-							  list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]);
-							  list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
-							  
-						   }
-						   else if(list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
-						   {
-							   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
+							   //Out ot Range
+							   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
+
+						    else if (current_crisp_value >= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] && current_crisp_value <= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2])
 							   {
-								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
-								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
-								   
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0;
 							   }
 							   else
 							   {
-								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - current_crisp_value) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]);
-								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 -((current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]));
 							   }
 						   }
-						   else
-						   {
-							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - current_crisp_value) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
-							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
-							
+						   //End centroids
+						   else if (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
+						   { //Out ot Range
+							   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
+							   else if (current_crisp_value >= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] && current_crisp_value <= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
+							   {
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0;
+							   }
+							   else
+							   {
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value =(current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
+							   }
 						   }
-
+						   //Middle centroids
+						   else
+						   {   //Out ot Range
+							   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
+							   else if (current_crisp_value >= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] && current_crisp_value <= list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2])
+							   {
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0;
+							   }
+							   else
+							   { 
+							   if(current_crisp_value< list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1]&& current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0])
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
+							   else
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - ((current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]));
+							   }
+						   }
 					   }
 				   }
-			   }
 		   }
+		   
 	      
 			
 
@@ -453,6 +435,11 @@ public:
 		
 		
 	}
+	//Defuzzifing the output variable
+	void defuzzification()
+	{
+
+	}
 	//Destructor
 	~Toolbox()
 	{
@@ -461,7 +448,7 @@ public:
 			for (int loop2 = 0; loop2 < list_of_fuzzy_sets[loop1].number_of_lingustical_terms; loop2++)
 			{
 				delete[]  list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape;
-				delete[]  list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range;
+				
 				
 			}
 			
@@ -490,7 +477,6 @@ int main()
 	my_tool_box.fuzzificaion();
 	my_tool_box.printAfterFuzzification();
 	my_tool_box.inferenceEngine();
-	cout << endl;
 	my_tool_box.printAfterInference();
 	system("pause");
 	

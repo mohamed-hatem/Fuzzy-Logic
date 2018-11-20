@@ -13,7 +13,7 @@ Cover 25
 3
 Sunny trapezoidal
 0 0 20 40
-Partly triangle
+Cloudy triangle
 20 50 80
 Overcast trapezoidal
 60 80 100 100

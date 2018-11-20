@@ -1,5 +1,10 @@
-/*This program is responsible for Applying fuzzy logic algorithm to a certain problem
+/*
+*******************************************************************************************************************
+*This program is responsible for Applying fuzzy logic algorithm to a certain problem
 *Input should be well defined based on the "Fuzzy_Logic.pdf" document attatched with the project
+*******************************************************************************************************************
+*As all pointer variables of structs and class Toolbox are initalized in Toolbox's member function getInputFromFile
+*We didnt implement any constructor 
 */
 
 //HEADERS & NAMESPACES
@@ -25,7 +30,13 @@ struct FuzzySetShape
 	string member_name;
 	//Type of the shape
 	string shape_type;
-
+	//Storing member value after fuzzification
+	double fuzzification_value;
+	/*Indication for where the centroid of the shape is located
+	*For triangle it's the middle coordinate , for trapezoidal its where 2 coordinates are equal
+	*If trapezoidal save the range of centroid
+	*/
+	double * centroid_range;
 };
 //Holds the list of members and values for a rule
 struct MemberOfRuleSet
@@ -42,7 +53,7 @@ struct RuleSet
 	//List to hold variables + 1 for the output variable
 	MemberOfRuleSet * list_of_variables_in_rule;
 	//List to hold operators
-	string * operator_list;
+	string * predicate_list;
 
 
 };
@@ -52,12 +63,14 @@ struct FuzzySet
 	string variable_name;
 	//Number of fuzzy members 
 	int number_of_lingustical_terms;
-	//Holds the data for all fuzzy members of this fuzzy set 
+	//Holds the data for all fuzzy members of this fuzzy set -> Trapzoidal or triangle
 	FuzzySetShape * list_of_members;
 	//The crisp value for the fuzzy set (We will use it for fuzzyfication process)
     double crisp_value;
+	
 
 };
+
 //This class will hold all methods that are related to fuzzy logic
 class Toolbox
 {   //Rules of the Fuzzy system
@@ -68,7 +81,10 @@ class Toolbox
 	int number_of_fuzzy_set;
 	//Number of rules
 	int number_of_rule_set;
+	
+	
 public:
+	//Get input from file
 	void getInputFromFile()
   	{   //Initialize and open the input file
 		ifstream input_file;
@@ -99,6 +115,32 @@ public:
 				{
 					input_file >> list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[loop3];
 				}
+				if (list_of_fuzzy_sets[loop1].list_of_members[loop2].shape_type == TRIANGLE)
+				{
+					list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range = new double[1];
+					list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1];
+				}
+				else
+				{
+					list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range = new double[2];
+					if (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
+					{
+						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0];
+						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2];
+					}
+					else if (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
+					{
+						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1];
+						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3];
+					}
+					else
+					{
+						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1];
+						list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] = list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2];
+					}
+					
+					
+				}
 
 			}
 
@@ -112,7 +154,7 @@ public:
 		for (int loop1 = 0; loop1 < number_of_rule_set; loop1++)
 		{
 			input_file >> list_of_rules[loop1].number_of_variables_in_rule;
-			list_of_rules[loop1].operator_list = new string[list_of_rules[loop1].number_of_variables_in_rule - 1];
+			list_of_rules[loop1].predicate_list = new string[list_of_rules[loop1].number_of_variables_in_rule - 1];
 			//We increment the number of variables cause of the result variable;
 			list_of_rules[loop1].number_of_variables_in_rule++;
 			list_of_rules[loop1].list_of_variables_in_rule = new MemberOfRuleSet[list_of_rules[loop1].number_of_variables_in_rule];
@@ -123,7 +165,7 @@ public:
 				input_file >> uneeded_extra_info_in_rule;
 				input_file >> list_of_rules[loop1].list_of_variables_in_rule[loop2].linguistic_name;
 				if (loop2 < list_of_rules[loop1].number_of_variables_in_rule - 2)
-					input_file >> list_of_rules[loop1].operator_list[loop2];
+					input_file >> list_of_rules[loop1].predicate_list[loop2];
 
 			}
 
@@ -132,6 +174,7 @@ public:
 		input_file.close();
 		
 	}
+	//Print rules in the system
 	void printRules()
 	{
 		cout << "Rules:" << endl;
@@ -143,13 +186,113 @@ public:
 				cout << " variable name = " << list_of_rules[loop1].list_of_variables_in_rule[loop2].variable_name;
 				cout << "  has value = " << list_of_rules[loop1].list_of_variables_in_rule[loop2].linguistic_name;
 				if (loop2 < list_of_rules[loop1].number_of_variables_in_rule - 2)
-					cout << " "<<list_of_rules[loop1].operator_list[loop2];
+					cout << " "<<list_of_rules[loop1].predicate_list[loop2];
 
 			}
 			cout << endl;
 		}
 
 	}
+	//Fuzzification function
+	void fuzzificaion()
+	{
+		
+		//Variable to store the current crisp value during each iteration over all members
+		double current_crisp_value;
+		//Calculate the value of each member excpet the output set
+		for (int loop1 = 0; loop1 < number_of_fuzzy_set - 1; loop1++)
+		{ current_crisp_value = list_of_fuzzy_sets[loop1].crisp_value;
+		   /*Initialize the list of membership values for each fuzzy set 
+		   *Size is determined by the type of shape -> triangle or trapezoidal
+		   */
+		   for (int loop2 = 0; loop2 < list_of_fuzzy_sets[loop1].number_of_lingustical_terms; loop2++)
+		   {
+		
+			   //Next step is to calculate the member values for each fuzzy set given the crisp value
+			  
+			   
+				   if (list_of_fuzzy_sets[loop1].list_of_members[loop2].shape_type == TRIANGLE)
+				   {   //Crisp value isnt in range
+					   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2])
+						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
+					   //Crisp value between triangle centroids
+					   else if (current_crisp_value == list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0])
+						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0;
+					   //Calculate degree of membership
+					   else
+					   {
+						   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
+						   {
+							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
+
+						   }
+						   else
+						   {
+							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2] - current_crisp_value) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1]);
+
+						   }
+
+					   }
+				   }
+				   //Trapezoidal
+				   else
+				   {   //Crisp value isnt in range
+					   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0] || current_crisp_value > list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3])
+						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 0.0;
+					   //Crisp value between trapeziodal centroids
+					   else if (current_crisp_value >= list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] && current_crisp_value <= list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[1])
+					   {
+						   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0;
+					   }
+					   //Calculate degree of membership
+					   else
+					   {
+						   if (list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0])
+						   {
+							  list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]);
+							  list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
+						   }
+						   else if(list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range[0] == list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
+						   {
+							   if (current_crisp_value < list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1])
+							   {
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (current_crisp_value - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
+							   }
+							   else
+							   {
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - current_crisp_value) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[3] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[2]);
+								   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
+							   }
+						   }
+						   else
+						   {
+							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - current_crisp_value) / (list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[1] - list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape[0]);
+							   list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value = 1.0 - list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value;
+						   }
+
+					   }
+				   }
+			   }
+		   }
+	      
+			
+
+		}
+	void printAfterFuzzification()
+	{
+		cout << "After Fuzzification : " << endl;
+		for (int loop1 = 0; loop1 < number_of_fuzzy_set - 1; loop1++)
+		{
+			for (int loop2 = 0; loop2 < list_of_fuzzy_sets[loop1].number_of_lingustical_terms; loop2++)
+			{
+				cout << "variable : " << list_of_fuzzy_sets[loop1].list_of_members[loop2].member_name << "  ";
+				cout << "has value = " << list_of_fuzzy_sets[loop1].list_of_members[loop2].fuzzification_value << endl;
+
+			}
+		}
+	}
+	//Destructor
 	~Toolbox()
 	{
 		for (int loop1 = 0; loop1 < number_of_fuzzy_set; loop1++)
@@ -157,16 +300,23 @@ public:
 			for (int loop2 = 0; loop2 < list_of_fuzzy_sets[loop1].number_of_lingustical_terms; loop2++)
 			{
 				delete[]  list_of_fuzzy_sets[loop1].list_of_members[loop2].coordinates_of_shape;
+				delete[]  list_of_fuzzy_sets[loop1].list_of_members[loop2].centroid_range;
+				
 			}
+			
 			delete[]  list_of_fuzzy_sets[loop1].list_of_members;
+			
+			
+			
 		}
 		for (int loop1 = 0; loop1 < number_of_rule_set; loop1++)
 		{
-		  delete[]	list_of_rules[loop1].operator_list;
+		  delete[]	list_of_rules[loop1].predicate_list;
 		  delete[]  list_of_rules[loop1].list_of_variables_in_rule;
 		}
 		delete[] list_of_fuzzy_sets;
 		delete[] list_of_rules;
+		
 	}
 	
 };
@@ -174,9 +324,10 @@ public:
 //Entry Point of the program
 int main()
 {
-	Toolbox mytoolbox;
-	mytoolbox.getInputFromFile();
-	mytoolbox.printRules();
+	Toolbox my_tool_box;
+	my_tool_box.getInputFromFile();
+	my_tool_box.fuzzificaion();
+	my_tool_box.printAfterFuzzification();
 	system("pause");
 	
 }

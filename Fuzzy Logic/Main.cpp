@@ -77,6 +77,8 @@ class Toolbox
 	int number_of_fuzzy_set;
 	//Number of rules
 	int number_of_rule_set;
+	//Final result
+	double final_value;
 	
 	
 public:
@@ -438,7 +440,49 @@ public:
 	//Defuzzifing the output variable
 	void defuzzification()
 	{
+		double segma_membership_values=0.0,segma_centroid_mult_membership_values=0.0;
+		//Denominator of the defuzzification equation
+		for (int loop1 = 0; loop1 < list_of_fuzzy_sets[number_of_fuzzy_set - 1].number_of_lingustical_terms; loop1++)
+		{
+			segma_membership_values += list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].fuzzification_value;
+		}
+		//Nominator of the defuzzification equation
+		for (int loop1 = 0; loop1 < list_of_fuzzy_sets[number_of_fuzzy_set - 1].number_of_lingustical_terms; loop1++)
+		{
+			if (list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].shape_type == TRIANGLE)
+			{   //centroid of a triangle is the middle coordinate
+				segma_centroid_mult_membership_values += (list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].fuzzification_value* list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[1]);
+			}
+			//Trapezodial
+			else
+			{   //Centroids are at the start of the trapeziod 
+				if(list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[0]== list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[1])
+				{
+					segma_centroid_mult_membership_values += (list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].fuzzification_value* list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[2]);
+				}
+				//Centroids are at the end of the trapeziod
+				else if (list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[2] == list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[3])
+				{
+					segma_centroid_mult_membership_values += (list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].fuzzification_value* list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[1]);
+				}
+				//Centroids are at the middle of the trapeziod
+				else
+				{
+					double centroid_mid_point = (list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[1]+ list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].coordinates_of_shape[2])/2.0;
+					segma_centroid_mult_membership_values += (list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].fuzzification_value*centroid_mid_point);
+				}
 
+			}
+		}
+		
+		final_value = segma_centroid_mult_membership_values / segma_membership_values;
+	}
+	//Function to print final result after defuzzification
+	void printAfterDefuzzification()
+	{
+		cout << "After defuzzification : " <<endl;
+		
+		cout << list_of_fuzzy_sets[number_of_fuzzy_set - 1].variable_name <<" has final result : " << final_value << endl;
 	}
 	//Destructor
 	~Toolbox()
@@ -478,6 +522,8 @@ int main()
 	my_tool_box.printAfterFuzzification();
 	my_tool_box.inferenceEngine();
 	my_tool_box.printAfterInference();
+	my_tool_box.defuzzification();
+	my_tool_box.printAfterDefuzzification();
 	system("pause");
 	
 }

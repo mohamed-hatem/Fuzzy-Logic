@@ -24,6 +24,6 @@ Slow trapezoidal
 Fast trapezoidal
 25 75 100 100
 2
-2 Temp = Warm AND Cover = Sunny Speed = Fast
-2 Temp = Cool AND Cover = Cloudy Speed = Slow
+2 Temp = Warm AND Cover = Sunny  Speed = Fast
+2 Temp = Cool AND Cover = Cloudy  Speed = Slow
 

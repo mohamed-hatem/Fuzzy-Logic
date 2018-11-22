@@ -18,7 +18,7 @@ using namespace std;
 #define TRAPZOIDAL "trapezoidal"
 #define TRIANGLE   "triangle"
 //Name of the input file currently being used
-#define INPUT_FILE "test cases/Speed_test_case.txt"
+#define INPUT_FILE "test cases/Lab_test_case.txt"
 
 //Struct to hold points whether the fuzzy set is a triangle or trapezodial shape
 struct FuzzySetShape
@@ -273,6 +273,7 @@ public:
 		cout << "After Fuzzification : " << endl;
 		for (int loop1 = 0; loop1 < number_of_fuzzy_set - 1; loop1++)
 		{
+			cout << list_of_fuzzy_sets[loop1].variable_name << endl;
 			for (int loop2 = 0; loop2 < list_of_fuzzy_sets[loop1].number_of_lingustical_terms; loop2++)
 			{
 				cout << "variable : " << list_of_fuzzy_sets[loop1].list_of_members[loop2].member_name << "  ";
@@ -428,6 +429,7 @@ public:
 	void printAfterInference()
 	{
 		cout << "After inference : " << endl;
+		cout << list_of_fuzzy_sets[number_of_fuzzy_set-1].variable_name << endl;
 		for (int loop1 = 0; loop1 < list_of_fuzzy_sets[number_of_fuzzy_set-1].number_of_lingustical_terms; loop1++)
 		{
 			cout << "variable : " << list_of_fuzzy_sets[number_of_fuzzy_set - 1].list_of_members[loop1].member_name << "  ";
